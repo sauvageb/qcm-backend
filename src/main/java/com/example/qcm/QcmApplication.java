@@ -9,8 +9,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class QcmApplication {
     }
 
     @Bean
-    CommandLineRunner commandLineRunner(UserRepository userRepository, RoleRepository roleRepository) {
+    CommandLineRunner commandLineRunner(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder encoder) {
         return new CommandLineRunner() {
             @Override
             public void run(String... args) throws Exception {
@@ -32,7 +33,7 @@ public class QcmApplication {
                 List<Role> roleList = Arrays.asList(role1, role2);
                 roleRepository.saveAll(roleList);
 
-                User userAdmin = new User("admin", "admin", Arrays.asList(role2));
+                User userAdmin = new User("admin", encoder.encode("admin"), Arrays.asList(role2));
                 userRepository.save(userAdmin);
 
 
