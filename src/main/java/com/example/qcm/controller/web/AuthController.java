@@ -1,4 +1,4 @@
-package com.example.qcm.controller;
+package com.example.qcm.controller.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
