@@ -1,7 +1,8 @@
 package com.example.qcm.security;
 
+import com.example.qcm.security.jwt.AuthEntryPointJwt;
+import com.example.qcm.security.jwt.AuthTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -14,14 +15,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
 @EnableWebSecurity
 public class WebSecurityConfig {
 
     @Autowired
-    @Qualifier("userDetailsServiceImpl")
     private UserDetailsService userDetailsService;
+    @Autowired
+    private AuthEntryPointJwt unauthorizedHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -39,13 +42,19 @@ public class WebSecurityConfig {
             return super.authenticationManagerBean();
         }
 
+        @Bean
+        public AuthTokenFilter authenticationJwtTokenFilter() {
+            return new AuthTokenFilter();
+        }
+
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http
                     .antMatcher("/api/**")
                     .cors()
                     .and().csrf().ignoringAntMatchers("/api/**")
-
+//                    .and()
+//                    .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
                     .and()
                     .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -55,6 +64,8 @@ public class WebSecurityConfig {
                     .antMatchers("/api/auth/**").permitAll()
                     .antMatchers("/signin").permitAll()
                     .anyRequest().authenticated();
+
+            http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         }
     }
 
